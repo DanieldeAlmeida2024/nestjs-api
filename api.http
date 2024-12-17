@@ -1,25 +1,31 @@
-GET http://localhost:3000/places?text=Rua Severina Marques de Abreu, Bairro Goia, Goiania, GO
+GET http://localhost:3000/places?text=av governador valadares, betim, 1000
 
 ###
-
-@originId=ChIJrWEK4az1XpMRSUODK5SnJpI
-@destinationId=ChIJBexIfNP1XpMRUqqnIKV17SA
+GET http://localhost:3000/places?text=av amazonas, belo horizonte, 1000
 
 ###
-GET http://localhost:3000/directions?originId={{originId}}&destinationId={{destinationId}}
+ ChIJMyzPysqQpgARlznSOl55NVs
+@originId = ChIJmx-wX0rCpgARjxH_rJ8d5do
+@destinationId = ChIJTcM3WRKWpgARIBxMZeldEtM
+
+###
+GET http://localhost:3000/directions?originId={{ originId }}&destinationId={{ destinationId }}
 
 ###
 POST http://localhost:3000/routes
 Content-Type: application/json
 
 {
-    "name": "Rota 1",
+    "name": "rota 1",
     "source_id": "{{ originId }}",
     "destination_id": "{{ destinationId }}"
 }
 
 ###
+POST http://localhost:3000/routes/67596c02396abb18d0c69574/start
+
+###
 GET http://localhost:3000/routes
 
 ###
-GET http://localhost:3000/routes/1
+GET http://localhost:3000/routes/674ef78bab1148ea9161c23b 

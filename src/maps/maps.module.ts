@@ -11,7 +11,7 @@ import { DirectionsService } from './directions/directions.service';
     PlacesService,
     {
       provide: GoogleMapsClient,
-      useValue: new GoogleMapsClient({}),
+      useValue: new GoogleMapsClient(),
     },
     DirectionsService,
   ],
