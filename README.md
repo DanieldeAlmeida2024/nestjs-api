@@ -1,3 +1,34 @@
+# nestjs-api
+
+Backend Node.js/NestJS de laboratório para rastreamento de veículos, integrações de mapas e mensageria.
+
+## Tecnologias
+Node.js, NestJS, TypeScript e Kafka.
+
+## Execução (após configurar dependências)
+```bash
+cp .env.example .env && docker compose up -d
+```
+
+**Validação sugerida:** `npm run build && npm test`. Não foi realizada nesta revisão documental.
+
+## Navegação
+Arquivos de referência: `src/, test/, package.json, api.http`.
+
+## Estado e riscos
+O README antigo dizia Django, mas o manifesto comprova NestJS. O repositório inclui node_modules e dist rastreados: limpar em PR separado após build controlado.
+
+## Guia técnico
+- [Requisitos](docs/REQUISITOS.md)
+- [Arquitetura](docs/ARQUITETURA.md)
+- [UML](docs/UML.puml)
+- [Plano de testes](docs/PLANO_TESTES.md)
+- [Instruções para IA](AGENTS.md)
+
+---
+
+## README histórico (algumas instruções podem estar desatualizadas)
+
 # Imersão Fullcycle 20 - Sistema de rastreamento de veículos
 
 ## Descrição
@@ -43,4 +74,3 @@ npm run start:dev
 ```
 
 As especificações das chamadas HTTP estão no arquivo `api.http`. Você pode usar a extensão `REST Client` do VSCode para fazer as chamadas.
-
