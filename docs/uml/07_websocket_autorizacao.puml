@@ -1,9 +1,11 @@
 @startuml
-title NestJS — autenticação temporária e salas exclusivas Socket.IO (v1.4.0)
+title NestJS — controle temporário de localização por rota (v1.4.0 proposta)
 actor "Cliente" as Client
 participant "Socket.IO Gateway" as WS
+participant "RoutesController HTTP" as HTTP
 participant "Policy HMAC" as Policy
 participant "RoutesService" as Routes
+participant "RoutesDriverService" as Driver
 collections "Sala route:<id>" as Room
 Client -> WS : connect auth.token
 WS -> Policy : readRouteAccessToken(token, secret, now)
@@ -13,26 +15,27 @@ alt token inválido ou sem secret
 else válido
  Policy --> WS : routeId, scope, exp
  WS -> Room : join somente na rota autorizada
- WS -> WS : timer desconecta na expiração
+ WS -> WS : desconectar quando expirar
  Client -> WS : client:new-points(route_id)
- alt scope != simulate ou routeId distinto
-  WS --> Client : WsException sem consulta
+ alt scope != simulate ou routeId diferente
+  WS --> Client : WsException
  else autorizado
   WS -> Routes : findOne(routeId)
-  WS -> Room : emit(server:new-points/<id>:list, ponto)
+  WS -> Room : emit apenas na sala da rota
  end
 end
-group POST HTTP protegido
- Client -> WS : [fluxo separado: POST /routes/id/process-route]
- note right
-  Controller exige Bearer simulate do id exato
-  e retorna 401 sem credencial.
-  Consumer Kafka usa Service diretamente.
- end note
+group Ingestão HTTP separada
+ Client -> HTTP : POST /routes/{id}/process-route\nAuthorization: Bearer capability
+ HTTP -> Policy : verificar scope simulate, rota e TTL
+ alt ausente, inválida ou rota distinta
+  HTTP --> Client : 401, sem escrever
+ else válida
+  HTTP -> Driver : processRoute(route_id, lat, lng)
+  Driver -> Room : emitNewPoints só para assinantes da rota
+ end
 end
 note bottom
-Sem canal global de localização.
-Emissor de token exige autorização externa e não está exposto.
-HTTP e autenticação da conta permanecem pendentes.
+Emissor de capabilities exige ACL de conta externa, não implementada.
+Demais endpoints HTTP necessitam RBAC, TLS e integração real.
 end note
 @enduml

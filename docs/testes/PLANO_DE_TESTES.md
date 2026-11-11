@@ -122,3 +122,10 @@ O endpoint `POST /routes/{id}/process-route` anteriormente permitia a **qualquer
 Agora o controller exige `Authorization: Bearer <route-capability>` assinado por HMAC, não expirado, com escopo `simulate` e `routeId` exatamente igual ao parâmetro `id`. Retorna **401 sem chamada ao service** em token ausente, inválido, somente leitura, expirado, associado à outra rota ou na ausência de segredo. O consumidor Kafka interno não usa esta rota, portanto segue funcionando.
 
 **Testes NEST-HTTP01..06:** `src/routes/routes.controller.spec.ts` substitui o teste antigo que apenas instanciava o controller; incluído no CI Jest. Exigir também teste de integração HTTP real e autorização de emissão do token baseada na conta. `POST /routes`, `PATCH /routes/:id`, `POST /routes/:id/start` e GET ainda exigem revisão de RBAC; este PR não os protege.
+
+
+### Resultado do gate da política de WebSocket e HTTP
+
+- [GitHub Actions #43119629162](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43119629162): **`npm run build` e 42/42 testes Jest aprovados em sete suítes** para o código de `9ba206432aac799f80e6c17c6bfd47ae7357aa4f`.
+- Inclui sete verificações NEST-WS e seis NEST-HTTP com token omitido, escopo somente leitura, rota distinta, expiração, assinatura inválida e acesso válido. Os testes são de unidade com socket/service simulados, **não** conexão Socket.IO/HTTP real.
+- Este PR altera contratos para rejeitar conexões/POST sem credencial de simulação; sem um emissor autorizado integrado aos usuários legítimos, o acesso ficará **bloqueado por padrão**. **Manter em draft até implementação e validação do emissor/ACL; não mesclar por estar verde.**
