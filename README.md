@@ -75,9 +75,22 @@ npm run start:dev
 
 As especificações das chamadas HTTP estão no arquivo `api.http`. Você pode usar a extensão `REST Client` do VSCode para fazer as chamadas.
 
-## Documentação técnica v1.0.0
+## Documentação técnica v1.1.0 proposta
 
 - [Especificação do projeto](docs/projeto/ESPECIFICACAO.md)
 - [Diagramas UML separados](docs/uml/README.md)
 - [Casos de teste](docs/testes/PLANO_DE_TESTES.md)
 - [Versionamento](docs/controle/VERSIONAMENTO.md)
+
+
+
+## Qualidade e checkout reproduzível (PR 1.1.0 proposto)
+
+O projeto tinha mais de 20 mil arquivos instalados em `node_modules` e código compilado em `dist` no índice Git, mesmo ignorados. Esta branch retira esses gerados do controle de versão **sem alterar o package-lock** e adiciona testes de comportamento de rotas, Google Maps e integração de pontos do motorista **com mocks**.
+
+```bash
+npm ci
+npm test -- --runInBand --runTestsByPath src/routes/routes.service.spec.ts src/maps/directions/directions.service.spec.ts src/maps/places/places.service.spec.ts src/routes/routes-driver/routes-driver.service.spec.ts
+```
+
+**Não afirmar:** cobertura completa, Kafka outbox, MongoDB real ou permissão segura de WebSocket. A rota `DELETE /routes/:id` permanece placeholder. [Contrato e riscos](docs/projeto/ESPECIFICACAO.md) · [Plano de testes](docs/testes/PLANO_DE_TESTES.md) · [Histórico de versão](docs/controle/VERSIONAMENTO.md).

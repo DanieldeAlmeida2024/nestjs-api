@@ -1,0 +1,38 @@
+@startuml
+title NestJS Routes — regressão de criação e eventos com mocks (v1.1.0 proposta)
+actor "Jest" as Test
+participant "RoutesService" as Routes
+participant "DirectionsService (mock)" as Maps
+database "Prisma route (mock)" as Prisma
+queue "Kafka Producer (mock)" as Kafka
+participant "RoutesDriverService" as Driver
+database "Prisma routeDriver (mock)" as RouteDriver
+participant "WebSocket gateway (mock)" as Gateway
+Test -> Routes : create({source_id,destination_id,name})
+Routes -> Maps : getDirections(place_id,...)
+Maps --> Routes : legs, steps, distance, duration
+Routes -> Prisma : route.create(...directions)
+Prisma --> Routes : route id
+Routes -> Kafka : send(RouteCreated, points)
+Routes --> Test : route persistida
+Test -> Routes : startRoute(id)
+Routes -> Prisma : findUniqueOrThrow
+alt rota ausente
+ Prisma --> Routes : rejeita
+ Routes --> Test : erro, sem evento Kafka
+else rota existente
+ Prisma --> Routes : rota
+ Routes -> Kafka : send(DeliveryStarted)
+end
+Test -> Driver : processRoute({route_id,lat,lng})
+Driver -> RouteDriver : upsert(point)
+RouteDriver --> Driver : registro
+Driver -> Gateway : emitNewPoints(payload)
+Gateway --> Test : canal individual + global (mesmo ponto)
+Test -> Gateway : handleMessage() com rota simulada
+Gateway --> Test : broadcasts do início e fim (lat,lng corretos)
+note bottom
+Quatro suites de lógica isolada. O CI não sobe
+MongoDB/Kafka/Google Maps nem valida outbox.
+end note
+@enduml
