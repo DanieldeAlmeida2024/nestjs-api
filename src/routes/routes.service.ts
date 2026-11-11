@@ -14,7 +14,6 @@ export class RoutesService {
   ) {}
 
   async create(createRouteDto: CreateRouteDto) {
-    console.log(createRouteDto);
     const { available_travel_modes, geocoded_waypoints, routes, request } =
       await this.directionsService.getDirections(
         createRouteDto.source_id,

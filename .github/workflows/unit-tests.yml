@@ -1,0 +1,27 @@
+name: NestJS - testes de negócio sem Google/Mongo/Kafka reais
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  unit:
+    name: Jest rotas, Maps e rastreamento
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+      - name: Instalar dependências pelo lock
+        run: npm ci --no-audit --no-fund
+      - name: Executar quatro suítes independentes de rede
+        run: >-
+          npm test -- --runInBand --runTestsByPath
+          src/routes/routes.service.spec.ts
+          src/maps/directions/directions.service.spec.ts
+          src/maps/places/places.service.spec.ts
+          src/routes/routes-driver/routes-driver.service.spec.ts
