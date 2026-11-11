@@ -1,0 +1,16 @@
+@startuml
+actor Simulador
+queue "Kafka simulation" as Broker
+participant RoutesDriverConsumer as Consumer
+participant "HTTP /routes/:id/process-route" as API
+participant RoutesDriverService as Svc
+database MongoDB
+participant "Socket.IO Gateway" as WS
+Simulador -> Broker : evento route_id,lat,lng
+Broker -> Consumer : @MessagePattern simulation
+Consumer -> API : POST process-route
+API -> Svc : processRoute
+Svc -> MongoDB : upsert / push Point
+Svc -> WS : emitNewPoints
+WS --> Simulador : stream de pontos (consumidor websocket)
+@enduml
