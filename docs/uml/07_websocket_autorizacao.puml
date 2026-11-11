@@ -22,6 +22,14 @@ else válido
   WS -> Room : emit(server:new-points/<id>:list, ponto)
  end
 end
+group POST HTTP protegido
+ Client -> WS : [fluxo separado: POST /routes/id/process-route]
+ note right
+  Controller exige Bearer simulate do id exato
+  e retorna 401 sem credencial.
+  Consumer Kafka usa Service diretamente.
+ end note
+end
 note bottom
 Sem canal global de localização.
 Emissor de token exige autorização externa e não está exposto.

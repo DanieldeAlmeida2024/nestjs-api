@@ -113,3 +113,12 @@ Base: `main` no commit `0f0b856b144e1b4329b20e6476fe2553444a6da9`. Branch: `fix/
 
 
 **NEST-WS01..07:** negar sem token, leitor sem simulação, isolamento entre rotas, emissão sem global, simulação autorizada, assinatura/TTL adulterados, validade máxima. Arquivo: `routes-driver.gateway.spec.ts`.
+
+
+### Revisão adicional 1.4.0 — proteção da rota HTTP de localização
+
+O endpoint `POST /routes/{id}/process-route` anteriormente permitia a **qualquer cliente** publicar coordenadas na rota (sem header de autenticação). Mesmo com salas Socket.IO protegidas, isso comprometia a integridade dos dados persistidos.
+
+Agora o controller exige `Authorization: Bearer <route-capability>` assinado por HMAC, não expirado, com escopo `simulate` e `routeId` exatamente igual ao parâmetro `id`. Retorna **401 sem chamada ao service** em token ausente, inválido, somente leitura, expirado, associado à outra rota ou na ausência de segredo. O consumidor Kafka interno não usa esta rota, portanto segue funcionando.
+
+**Testes NEST-HTTP01..06:** `src/routes/routes.controller.spec.ts` substitui o teste antigo que apenas instanciava o controller; incluído no CI Jest. Exigir também teste de integração HTTP real e autorização de emissão do token baseada na conta. `POST /routes`, `PATCH /routes/:id`, `POST /routes/:id/start` e GET ainda exigem revisão de RBAC; este PR não os protege.
