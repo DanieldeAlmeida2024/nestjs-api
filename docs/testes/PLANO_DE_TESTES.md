@@ -54,3 +54,14 @@ Consultar `package.json` e usar os scripts de teste Jest do projeto; rodar build
 ## Registro do CI da versão 1.1.0 proposta
 
 [Workflow #43112073712](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43112073712): **5 suites Jest aprovadas / 13 testes aprovados**, a partir do PR com `node_modules` e `dist` removidos do controle de versão. O teste de gateway verifica emissão individual/global e as coordenadas distintas do ponto final com relógio simulado. O teste de Mapas/Prisma/Kafka usa dublês e não prova segurança de rede real. Não executar e2e real sem ambientes descartáveis e chaves de teste autorizadas.
+
+
+## Novos cenários automatizados — revisão 1.2.0 proposta
+
+| Caso | Teste Jest | Invariante | Status |
+|---|---|---|---|
+| NEST-T09 | 10 entradas inválidas via `it.each` | Latitude/longitude finitas e dentro da faixa, route_id não vazio; nenhum `upsert`/broadcast ao rejeitar | CI pendente |
+| NEST-T10 | `RoutesService.remove` | Retorna erro `NotImplementedException`, sem gravação Kafka/Prisma; não afirma exclusão fictícia | CI pendente |
+| NEST-T15 | `npm run build` | Compila todo NestJS; revela TS de módulos não exercitados no Jest direcionado | CI pendente |
+
+A suíte original de cinco arquivos permanece em `unit-tests.yml`. O build é gate adicional, sem alegar que a aplicação está pronta para deploy.

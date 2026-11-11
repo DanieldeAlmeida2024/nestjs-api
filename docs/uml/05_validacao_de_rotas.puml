@@ -1,0 +1,28 @@
+@startuml
+title NestJS Routes — validação HTTP e exclusão desabilitada (v1.2.0)
+actor "Cliente" as Client
+participant "RoutesController" as Ctl
+participant "RoutesDriverService" as Tracker
+participant "RoutesService" as Routes
+database "Prisma MongoDB" as Prisma
+participant "WebSocket gateway" as WS
+Client -> Ctl : POST /routes/{id}/process-route (lat, lng)
+Ctl -> Tracker : processRoute(route_id,lat,lng)
+Tracker -> Tracker : validar id string não vazio,
+latitude [-90,90], longitude [-180,180], finitos
+alt entrada inválida
+ Tracker --> Client : HTTP 400 BadRequestException
+else dados válidos
+ Tracker -> Prisma : upsert RouteDriver
+ Prisma --> Tracker : registro salvo
+ Tracker -> WS : emitNewPoints
+ Tracker --> Client : resposta RouteDriver
+end
+Client -> Ctl : DELETE /routes/{id}
+Ctl -> Routes : remove(id string)
+Routes --> Client : HTTP 501 NotImplementedException
+note bottom
+DELETE não altera banco nem anuncia exclusão.
+RBAC/autenticação e E2E Mongo/WebSocket continuam pendentes.
+end note
+@enduml

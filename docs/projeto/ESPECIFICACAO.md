@@ -49,3 +49,13 @@ A compilação de gateway falhava por `@ts-expect-error` obsoleto (TS2578), dete
 
 
 **Evidência de regressão técnica:** o CI [#43112073712](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43112073712) executou **5 testes agrupados em suites Jest, total de 13 métodos PASS**. A remoção de 20.153 arquivos de dependências versionadas e 60 de compilados tornou o checkout do PR reproduzível por `npm ci`; o lock permaneceu inalterado. A API não foi executada em servidor nem foram ativadas chamadas Google Maps/Kafka/Mongo.
+
+
+## Boundary checks 1.2.0 proposta
+
+- `RoutesDriverService.processRoute` valida `route_id` não vazio, `lat` finito em [-90,+90] e `lng` finito em [-180,+180], **antes de chamar Prisma**. HTTP com string no lugar de número retorna BadRequestException; o código de controller permanece com TypeScript tipado mas não assume parsing automático.
+- `RoutesService.remove` deixa de devolver placeholder de sucesso; lança `NotImplementedException` (HTTP 501) de maneira deliberada. Não realiza exclusão até resolver autenticação, autorização de rota, integridade e auditoria.
+- CI passa a compilar `nest build` antes dos Jest existentes. Se o build revelar problemas antigos, documentá-los e corrigir em PR sem enfraquecer testes.
+- **Permanecem abertos:** WebSocket sem autorização, `origin:'*'`, Kafka outbox, ObjectId inválido, rate-limit e testes reais Mongo/Kafka.
+
+[Plano de testes](../testes/PLANO_DE_TESTES.md) · [UML boundary checks](../uml/05_validacao_de_rotas.puml).

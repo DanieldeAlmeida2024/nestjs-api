@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { RoutesDriverGateway } from './routes-driver.gateway';
 //import { DirectionsResponseData } from '@googlemaps/google-maps-services-js';
@@ -11,6 +11,19 @@ export class RoutesDriverService {
   ) {}
 
   async processRoute(dto: { route_id: string; lat: number; lng: number }) {
+    if (
+      typeof dto?.route_id !== 'string' ||
+      dto.route_id.trim().length === 0 ||
+      typeof dto.lat !== 'number' ||
+      !Number.isFinite(dto.lat) ||
+      Math.abs(dto.lat) > 90 ||
+      typeof dto.lng !== 'number' ||
+      !Number.isFinite(dto.lng) ||
+      Math.abs(dto.lng) > 180
+    ) {
+      throw new BadRequestException('Identificador ou coordenadas inválidos');
+    }
+
     const routeDriver = await this.prismaService.routeDriver.upsert({
       include: {
         route: true, //eager loading

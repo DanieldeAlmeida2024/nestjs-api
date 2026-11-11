@@ -94,3 +94,7 @@ npm test -- --runInBand --runTestsByPath src/routes/routes.service.spec.ts src/m
 ```
 
 **Não afirmar:** cobertura completa, Kafka outbox, MongoDB real ou permissão segura de WebSocket. A rota `DELETE /routes/:id` permanece placeholder. [Contrato e riscos](docs/projeto/ESPECIFICACAO.md) · [Plano de testes](docs/testes/PLANO_DE_TESTES.md) · [Histórico de versão](docs/controle/VERSIONAMENTO.md).
+
+
+## Segurança de contrato HTTP (v1.2.0 proposta)
+`POST /routes/:id/process-route` rejeita coordenadas fora dos intervalos geográficos ou não finitas antes de consultar Prisma; `DELETE /routes/:id` responde **501 Não implementado**, em vez de simular exclusão. O CI adiciona `npm run build` ao gate Jest. [Especificação](docs/projeto/ESPECIFICACAO.md) · [Testes](docs/testes/PLANO_DE_TESTES.md). Nenhum deploy foi realizado.

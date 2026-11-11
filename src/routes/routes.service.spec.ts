@@ -88,4 +88,12 @@ describe('RoutesService — domínio de rotas sem rede externa', () => {
     await service.findOne('route-a');
     expect(prisma.route.findUniqueOrThrow).toHaveBeenCalledWith({ where: { id: 'route-a' } });
   });
+  it('NEST-T10 DELETE não retorna sucesso falso nem realiza escrita', () => {
+    const { NotImplementedException } = require('@nestjs/common');
+    expect(() => service.remove('507f1f77bcf86cd799439011')).toThrow(NotImplementedException);
+    expect(prisma.route.update).not.toHaveBeenCalled();
+    expect(prisma.route.create).not.toHaveBeenCalled();
+    expect(kafka.send).not.toHaveBeenCalled();
+  });
+
 });

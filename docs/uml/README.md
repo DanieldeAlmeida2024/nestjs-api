@@ -6,3 +6,6 @@ Diagramas editáveis: [01_componentes](01_componentes.puml) · [02_modelo_rotas]
 
 
 - [Sequência de teste de criação/entrega com Maps/Prisma/Kafka simulados](04_testes_dominio_rotas.puml) — revisão 1.1.0 proposta, não é diagrama de garantia E2E.
+
+
+- [Validação geográfica e exclusão fail-closed](05_validacao_de_rotas.puml) — v1.2.0 proposta.

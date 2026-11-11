@@ -58,6 +58,6 @@ export class RoutesController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.routesService.remove(+id);
+    return this.routesService.remove(id);
   }
 }
