@@ -92,3 +92,24 @@ A suíte original de cinco arquivos permanece em `unit-tests.yml`. O build é ga
 - [GitHub Actions #43116729112](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43116729112): **31/31 PASS**. Seis suítes Jest, 31 testes aprovados e compilação NestJS aprovada. Inclui o consumidor Kafka com serviço interno, erros de coordenadas e ausência de chamada HTTP localhost.
 - Commit de código testado: `7a5819029555f49a932ae76a5bc64cb0c762df73`. Documentação adicionada depois do run; novo HEAD deverá manter os mesmos gates verdes antes do merge.
 - Sem deploy; CI não substitui testes de segurança/rede/ambiente real fora do escopo.
+
+## 1.4.0 proposta — controle de acesso WebSocket por rota (11/11/2026)
+
+Base: `main` no commit `0f0b856b144e1b4329b20e6476fe2553444a6da9`. Branch: `fix/ws-route-scoped-auth-20261111`.
+
+**Achado:** `RoutesDriverGateway` aceitava qualquer conexão Socket.IO e simulava rotas por `route_id` fornecido pelo cliente. `emitNewPoints` transmitia GPS para todos no evento global `server:new-points:list`. `cors.origin='*'` permitia qualquer origem de navegador.
+
+**Mitigação codificada:**
+- Socket recebe `handshake.auth.token` HMAC-SHA256 com `aud=nestjs-route-points`, `routeId`, `scope='read'|'simulate'`, expiração máxima de 15 minutos; sem secret de 32 bytes em `ROUTES_WS_TOKEN_SECRET`, a conexão é rejeitada.
+- `ROUTES_WS_ALLOWED_ORIGINS` é lista explícita, separada por vírgula; padrão vazio, **não usa wildcard**.
+- Conexões inválidas desconectadas; credenciais válidas entram apenas na sala Socket.IO `route:<routeId>`; timer desconecta após expiração.
+- O comando `client:new-points` requer escopo `simulate`, token vigente e ID da mesma rota. O escopo `read` não autoriza simular.
+- `emitNewPoints` transmite somente à sala da rota; evento global eliminado para impedir que a localização seja vista por assinantes de outras rotas.
+- Emissão de token só em backend confiável, **após autorização do usuário e da rota** via helper `issueRouteAccessToken`. **Nenhum endpoint público emite token.**
+
+**Limitações bloqueantes:** ainda não existe integração de autenticação de contas/tenant ou emissor autorizado nesta aplicação; a política protege apenas conexões com capabilities provisionadas externamente e sua emissão precisa ser vinculada à ACL real. A rota HTTP `POST /routes/:id/process-route` e outros endpoints permanecem sem RBAC; CORS não protege clientes não browser. Token compartilhado entre usuários é proibido. HTTPS/WSS, revogação antecipada, limitação de taxa e auditoria de reconexões exigem implementação antes da exposição pública. É alteração incompatível do contrato de eventos; clientes que usam feed global precisam migrar.
+
+**Gates:** `npm run build`, seis suites anteriores e novos testes NEST-WS01..07. Não declarar E2E Socket.IO de rede antes da execução.
+
+
+**NEST-WS01..07:** negar sem token, leitor sem simulação, isolamento entre rotas, emissão sem global, simulação autorizada, assinatura/TTL adulterados, validade máxima. Arquivo: `routes-driver.gateway.spec.ts`.

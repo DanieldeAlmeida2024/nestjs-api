@@ -1,0 +1,30 @@
+@startuml
+title NestJS — autenticação temporária e salas exclusivas Socket.IO (v1.4.0)
+actor "Cliente" as Client
+participant "Socket.IO Gateway" as WS
+participant "Policy HMAC" as Policy
+participant "RoutesService" as Routes
+collections "Sala route:<id>" as Room
+Client -> WS : connect auth.token
+WS -> Policy : readRouteAccessToken(token, secret, now)
+alt token inválido ou sem secret
+ Policy --> WS : null
+ WS --> Client : disconnect
+else válido
+ Policy --> WS : routeId, scope, exp
+ WS -> Room : join somente na rota autorizada
+ WS -> WS : timer desconecta na expiração
+ Client -> WS : client:new-points(route_id)
+ alt scope != simulate ou routeId distinto
+  WS --> Client : WsException sem consulta
+ else autorizado
+  WS -> Routes : findOne(routeId)
+  WS -> Room : emit(server:new-points/<id>:list, ponto)
+ end
+end
+note bottom
+Sem canal global de localização.
+Emissor de token exige autorização externa e não está exposto.
+HTTP e autenticação da conta permanecem pendentes.
+end note
+@enduml
