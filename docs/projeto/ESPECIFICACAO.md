@@ -42,3 +42,7 @@ API de rotas de entrega integrada ao Google Maps Directions, MongoDB (via Prisma
 - **Débito explícito:** falha Kafka após criação pode deixar registro sem evento; remover log e adicionar testes não equivale a outbox/retry. `RoutesService.remove` ainda devolve string sem exclusão real; manter bloqueado antes de disponibilizar essa rota em produção.
 
 **Instalação limpa:** `npm ci` a partir do lock, executada no CI do PR. Não é necessário manter a árvore de dependências no Git. [Rastreabilidade dos testes](../testes/PLANO_DE_TESTES.md) e [sequência UML](../uml/04_testes_dominio_rotas.puml).
+
+
+### Regressão de WebSocket descoberta no CI
+A compilação de gateway falhava por `@ts-expect-error` obsoleto (TS2578), detectado no primeiro CI. O método `RoutesDriverGateway.handleMessage` também transmitia o **ponto inicial duas vezes** no canal global (a segunda emissão usava `lat,lng` ao invés de `lat2,lng2`). O patch corrige essa divergência e acrescenta teste com timers Jest, sem rede real. O `origin:'*'` segue aberto como problema de autorização/CORS.

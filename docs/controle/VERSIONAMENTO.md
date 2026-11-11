@@ -20,3 +20,10 @@ Versão MAJOR quando contrato/entidades mudarem; MINOR para novos fluxos; PATCH 
 A limpeza remove arquivos **do índice Git nesta branch**, não apaga artefatos de commits antigos nem edita dependências do `package.json`. O procedimento recomendado é `npm ci` após checkout limpo; arquivos ignorados são regenerados localmente. O código não publicou versão de API.
 
 **Pendências após esta versão:** teste end-to-end real (MongoDB/Kafka), autorização WebSocket, tratamento de erro do provedor, outbox/retry Kafka, `DELETE /routes/:id` placeholder, configuração de CORS e testes da suíte antiga sem mocks. O escopo do CI adicionado é intencionalmente limitado a quatro suites.
+
+
+### Falha detectada no primeiro CI e correção adicional
+- [Run #43111666268](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43111666268): **3/4 suites passaram** (9 testes), a suite de `RoutesDriverService` falhou em compilação porque `routes-driver.gateway.ts` continha `@ts-expect-error` obsoleto, agora rejeitado por TypeScript (`TS2578`).
+- **Correção no código:** remove anotação inválida e corrige um erro funcional no broadcast: a coordenada final antes repetia `lat,lng` iniciais; agora publica `lat2,lng2` corretos.
+- **Cobertura nova:** `RoutesDriverGateway` tem dois testes Jest, incluindo avanço de relógio simulado e verificação de início/fim sem esperar 4 segundos reais; o workflow executa agora cinco suites.
+- Resultado dos novos jobs deve ser verificado no HEAD; não confundir o CI anterior com aprovação.

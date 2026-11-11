@@ -25,3 +25,4 @@ jobs:
           src/maps/directions/directions.service.spec.ts
           src/maps/places/places.service.spec.ts
           src/routes/routes-driver/routes-driver.service.spec.ts
+          src/routes/routes-driver/routes-driver.gateway.spec.ts

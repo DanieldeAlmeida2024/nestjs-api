@@ -28,6 +28,9 @@ Test -> Driver : processRoute({route_id,lat,lng})
 Driver -> RouteDriver : upsert(point)
 RouteDriver --> Driver : registro
 Driver -> Gateway : emitNewPoints(payload)
+Gateway --> Test : canal individual + global (mesmo ponto)
+Test -> Gateway : handleMessage() com rota simulada
+Gateway --> Test : broadcasts do início e fim (lat,lng corretos)
 note bottom
 Quatro suites de lógica isolada. O CI não sobe
 MongoDB/Kafka/Google Maps nem valida outbox.
