@@ -76,3 +76,37 @@ A compilação de gateway falhava por `@ts-expect-error` obsoleto (TS2578), dete
 **Agora:** `RoutesDriverConsumer` injeta `RoutesDriverService` (já provider no `RoutesModule`) e chama `processRoute` diretamente. O service já rejeita coordenadas inválidas, grava via Prisma, e só emite WebSocket após persistir. O consumidor não registra o payload de localização inteiro no log. A API `POST /routes/:id/process-route` **não** foi removida nem protegida nesta mudança; sua autorização segue pendente.
 
 **Limites:** não foram adicionados idempotency keys, ordenação de eventos, deduplicação de pontos nem backoff/dead-letter para Kafka. Sem MongoDB real ou consumer group no CI, o teste é unitário com a implementação do service e gateways simulados.
+
+## 1.4.0 proposta — controle de acesso WebSocket por rota (11/11/2026)
+
+Base: `main` no commit `0f0b856b144e1b4329b20e6476fe2553444a6da9`. Branch: `fix/ws-route-scoped-auth-20261111`.
+
+**Achado:** `RoutesDriverGateway` aceitava qualquer conexão Socket.IO e simulava rotas por `route_id` fornecido pelo cliente. `emitNewPoints` transmitia GPS para todos no evento global `server:new-points:list`. `cors.origin='*'` permitia qualquer origem de navegador.
+
+**Mitigação codificada:**
+- Socket recebe `handshake.auth.token` HMAC-SHA256 com `aud=nestjs-route-points`, `routeId`, `scope='read'|'simulate'`, expiração máxima de 15 minutos; sem secret de 32 bytes em `ROUTES_WS_TOKEN_SECRET`, a conexão é rejeitada.
+- `ROUTES_WS_ALLOWED_ORIGINS` é lista explícita, separada por vírgula; padrão vazio, **não usa wildcard**.
+- Conexões inválidas desconectadas; credenciais válidas entram apenas na sala Socket.IO `route:<routeId>`; timer desconecta após expiração.
+- O comando `client:new-points` requer escopo `simulate`, token vigente e ID da mesma rota. O escopo `read` não autoriza simular.
+- `emitNewPoints` transmite somente à sala da rota; evento global eliminado para impedir que a localização seja vista por assinantes de outras rotas.
+- Emissão de token só em backend confiável, **após autorização do usuário e da rota** via helper `issueRouteAccessToken`. **Nenhum endpoint público emite token.**
+
+**Limitações bloqueantes:** ainda não existe integração de autenticação de contas/tenant ou emissor autorizado nesta aplicação; a política protege apenas conexões com capabilities provisionadas externamente e sua emissão precisa ser vinculada à ACL real. A rota HTTP `POST /routes/:id/process-route` e outros endpoints permanecem sem RBAC; CORS não protege clientes não browser. Token compartilhado entre usuários é proibido. HTTPS/WSS, revogação antecipada, limitação de taxa e auditoria de reconexões exigem implementação antes da exposição pública. É alteração incompatível do contrato de eventos; clientes que usam feed global precisam migrar.
+
+**Gates:** `npm run build`, seis suites anteriores e novos testes NEST-WS01..07. Não declarar E2E Socket.IO de rede antes da execução.
+
+
+### Revisão adicional 1.4.0 — proteção da rota HTTP de localização
+
+O endpoint `POST /routes/{id}/process-route` anteriormente permitia a **qualquer cliente** publicar coordenadas na rota (sem header de autenticação). Mesmo com salas Socket.IO protegidas, isso comprometia a integridade dos dados persistidos.
+
+Agora o controller exige `Authorization: Bearer <route-capability>` assinado por HMAC, não expirado, com escopo `simulate` e `routeId` exatamente igual ao parâmetro `id`. Retorna **401 sem chamada ao service** em token ausente, inválido, somente leitura, expirado, associado à outra rota ou na ausência de segredo. O consumidor Kafka interno não usa esta rota, portanto segue funcionando.
+
+**Testes NEST-HTTP01..06:** `src/routes/routes.controller.spec.ts` substitui o teste antigo que apenas instanciava o controller; incluído no CI Jest. Exigir também teste de integração HTTP real e autorização de emissão do token baseada na conta. `POST /routes`, `PATCH /routes/:id`, `POST /routes/:id/start` e GET ainda exigem revisão de RBAC; este PR não os protege.
+
+
+### Resultado do gate da política de WebSocket e HTTP
+
+- [GitHub Actions #43119629162](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43119629162): **`npm run build` e 42/42 testes Jest aprovados em sete suítes** para o código de `9ba206432aac799f80e6c17c6bfd47ae7357aa4f`.
+- Inclui sete verificações NEST-WS e seis NEST-HTTP com token omitido, escopo somente leitura, rota distinta, expiração, assinatura inválida e acesso válido. Os testes são de unidade com socket/service simulados, **não** conexão Socket.IO/HTTP real.
+- Este PR altera contratos para rejeitar conexões/POST sem credencial de simulação; sem um emissor autorizado integrado aos usuários legítimos, o acesso ficará **bloqueado por padrão**. **Manter em draft até implementação e validação do emissor/ACL; não mesclar por estar verde.**
