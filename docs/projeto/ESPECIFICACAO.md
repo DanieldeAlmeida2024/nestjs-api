@@ -67,3 +67,12 @@ A compilação de gateway falhava por `@ts-expect-error` obsoleto (TS2578), dete
 - Etapas explicitamente confirmadas no job: `npm ci`, **`npm run build` aprovado**, e cinco suítes Jest direcionadas aprovadas, incluindo entradas GPS inválidas e rejeição de DELETE placeholder.
 - Commit de código/documentos validado: `c2899183f092f295a728c95c4626c40f5e945ce9`. Commit só documental posterior exige novo CI.
 - Não é validação HTTP/Mongo/Kafka real nem certificação de autorização WebSocket. DELETE permanece explicitamente desabilitado com HTTP 501.
+
+
+## Ingestão de pontos Kafka — contrato 1.3.0 proposto
+
+**Antes:** o handler `@MessagePattern('simulation')` extraía `route_id,lat,lng` e chamava `http://localhost:3000/routes/{id}/process-route`. Isso falhava quando a API estava em outro endereço/porta, gerava overhead local e exigia disponibilizar uma rota HTTP só para comunicação interna.
+
+**Agora:** `RoutesDriverConsumer` injeta `RoutesDriverService` (já provider no `RoutesModule`) e chama `processRoute` diretamente. O service já rejeita coordenadas inválidas, grava via Prisma, e só emite WebSocket após persistir. O consumidor não registra o payload de localização inteiro no log. A API `POST /routes/:id/process-route` **não** foi removida nem protegida nesta mudança; sua autorização segue pendente.
+
+**Limites:** não foram adicionados idempotency keys, ordenação de eventos, deduplicação de pontos nem backoff/dead-letter para Kafka. Sem MongoDB real ou consumer group no CI, o teste é unitário com a implementação do service e gateways simulados.

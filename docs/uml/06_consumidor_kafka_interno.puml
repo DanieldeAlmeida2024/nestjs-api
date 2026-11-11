@@ -1,0 +1,29 @@
+@startuml
+title NestJS — ingestion simulation Kafka sem HTTP loopback (v1.3.0 proposta)
+queue "Kafka simulation" as Broker
+participant "RoutesDriverConsumer" as Consumer
+participant "RoutesDriverService" as Service
+database "Prisma MongoDB" as Prisma
+participant "RoutesDriverGateway" as Gateway
+Broker -> Consumer : @MessagePattern simulation (route_id,lat,lng)
+Consumer -> Service : processRoute()
+Service -> Service : validar ID e coordenadas
+alt inválidos
+ Service --> Consumer : BadRequestException
+ Consumer --> Broker : erro propagado
+else válidos
+ Service -> Prisma : routeDriver.upsert()
+ alt falha banco
+  Prisma --> Service : erro
+  Service --> Consumer : erro sem WebSocket
+ else commit
+  Prisma --> Service : registro salvo
+  Service -> Gateway : emitNewPoints()
+  Service --> Consumer : registro salvo
+ end
+end
+note bottom
+No Kafka real, retry e deduplicação ainda requerem contrato.
+HTTP externo process-route continua presente e deve ser protegido.
+end note
+@enduml

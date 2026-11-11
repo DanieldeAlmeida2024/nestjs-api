@@ -20,7 +20,7 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Validar build TypeScript/NestJS
         run: npm run build
-      - name: Executar cinco suítes independentes de rede
+      - name: Executar seis suítes independentes de rede
         run: >-
           npm test -- --runInBand --runTestsByPath
           src/routes/routes.service.spec.ts
@@ -28,3 +28,4 @@ jobs:
           src/maps/places/places.service.spec.ts
           src/routes/routes-driver/routes-driver.service.spec.ts
           src/routes/routes-driver/routes-driver.gateway.spec.ts
+          src/routes/routes-driver/routes-driver.consumer.spec.ts
