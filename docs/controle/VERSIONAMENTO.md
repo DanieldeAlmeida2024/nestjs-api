@@ -63,3 +63,10 @@ A limpeza remove arquivos **do índice Git nesta branch**, não apaga artefatos 
 | **1.3.0 proposta** | `fix/kafka-consumer-internal-service-20261111` | `RoutesDriverConsumer` injeta `RoutesDriverService` e não usa `HttpService.axiosRef.post(localhost:3000)`; testes de simulação Kafka simulada em CI |
 
 O evento `simulation` já trafega dentro do mesmo módulo NestJS. O novo consumidor mantém a persistência `routeDriver.upsert` e o WebSocket por meio do serviço existente, sem exigir que o processo faça chamada HTTP a si próprio. Validação das coordenadas permanece centralizada no service e erros são propagados ao broker (política efetiva de retry/idempotência Kafka ainda **não implementada**). Não há deploy.
+
+
+### Evidência verificada no CI da revisão 1.3.0
+
+- [GitHub Actions #43116729112](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43116729112): **31/31 PASS**. Seis suítes Jest, 31 testes aprovados e compilação NestJS aprovada. Inclui o consumidor Kafka com serviço interno, erros de coordenadas e ausência de chamada HTTP localhost.
+- Commit de código testado: `7a5819029555f49a932ae76a5bc64cb0c762df73`. Documentação adicionada depois do run; novo HEAD deverá manter os mesmos gates verdes antes do merge.
+- Sem deploy; CI não substitui testes de segurança/rede/ambiente real fora do escopo.
