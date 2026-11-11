@@ -1,0 +1,21 @@
+@startuml
+class Route {
+ id: ObjectId
+ name: String
+ source: Place
+ destination: Place
+ distance: Float
+ duration: Float
+ freight?: Float
+ directions: Json
+}
+class RouteDriver { id: ObjectId; route_id: ObjectId <<unique>>; points: Point[] }
+class Place { name; location: Coord }
+class Point { location: Coord; created_at: DateTime }
+class Coord { lat: Float; lng: Float }
+Route "1" -- "0..1" RouteDriver
+Route --> Place
+RouteDriver o-- Point
+Point --> Coord
+Place --> Coord
+@enduml

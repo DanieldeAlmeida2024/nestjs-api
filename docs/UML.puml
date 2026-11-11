@@ -1,10 +1,26 @@
 @startuml
-title nestjs-api - componentes conceituais
-actor Usuario
-component Entrada
-component Aplicacao
-component Integracoes
-Usuario --> Entrada
-Entrada --> Aplicacao
-Aplicacao --> Integracoes
+actor "Frontend/Driver" as Cliente
+component "RoutesController" as Ctrl
+component "RoutesService" as Svc
+component "DirectionsService" as Maps
+cloud "Google Maps Directions" as Google
+component "PrismaService" as Prisma
+database MongoDB
+queue "Kafka: route, simulation" as Kafka
+component "RoutesDriverConsumer" as Consumer
+component "RoutesDriverService" as Driver
+component "Socket.IO Gateway" as WS
+Cliente --> Ctrl
+Ctrl --> Svc
+Svc --> Maps
+Maps --> Google
+Svc --> Prisma
+Prisma --> MongoDB
+Svc --> Kafka
+Kafka --> Consumer
+Consumer --> Ctrl : HTTP process-route
+Ctrl --> Driver
+Driver --> Prisma
+Driver --> WS
+WS --> Cliente
 @enduml

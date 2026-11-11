@@ -74,3 +74,10 @@ npm run start:dev
 ```
 
 As especificações das chamadas HTTP estão no arquivo `api.http`. Você pode usar a extensão `REST Client` do VSCode para fazer as chamadas.
+
+## Documentação técnica v1.0.0
+
+- [Especificação do projeto](docs/projeto/ESPECIFICACAO.md)
+- [Diagramas UML separados](docs/uml/README.md)
+- [Casos de teste](docs/testes/PLANO_DE_TESTES.md)
+- [Versionamento](docs/controle/VERSIONAMENTO.md)
