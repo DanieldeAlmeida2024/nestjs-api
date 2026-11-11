@@ -46,3 +46,6 @@ API de rotas de entrega integrada ao Google Maps Directions, MongoDB (via Prisma
 
 ### Regressão de WebSocket descoberta no CI
 A compilação de gateway falhava por `@ts-expect-error` obsoleto (TS2578), detectado no primeiro CI. O método `RoutesDriverGateway.handleMessage` também transmitia o **ponto inicial duas vezes** no canal global (a segunda emissão usava `lat,lng` ao invés de `lat2,lng2`). O patch corrige essa divergência e acrescenta teste com timers Jest, sem rede real. O `origin:'*'` segue aberto como problema de autorização/CORS.
+
+
+**Evidência de regressão técnica:** o CI [#43112073712](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43112073712) executou **5 testes agrupados em suites Jest, total de 13 métodos PASS**. A remoção de 20.153 arquivos de dependências versionadas e 60 de compilados tornou o checkout do PR reproduzível por `npm ci`; o lock permaneceu inalterado. A API não foi executada em servidor nem foram ativadas chamadas Google Maps/Kafka/Mongo.

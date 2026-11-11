@@ -49,3 +49,8 @@ Consultar `package.json` e usar os scripts de teste Jest do projeto; rodar build
 - Teste em `src/routes/routes-driver/routes-driver.gateway.spec.ts`: `emitNewPoints` deve publicar o mesmo ponto no canal individual e no global; `handleMessage` deve enviar **coordenadas de origem e destino distintas**, com relógio de teste para evitar espera de 2 s por etapa.
 - **Defeito corrigido:** mensagem global do ponto final usava as coordenadas iniciais. A anotação TypeScript inválida `@ts-expect-error` foi removida após falha real de compilação no [CI #43111666268](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43111666268).
 - **Limite:** prova de unidade com sockets e banco simulados, não prova segurança WebSocket, ordenação sob carga nem consumo Kafka.
+
+
+## Registro do CI da versão 1.1.0 proposta
+
+[Workflow #43112073712](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43112073712): **5 suites Jest aprovadas / 13 testes aprovados**, a partir do PR com `node_modules` e `dist` removidos do controle de versão. O teste de gateway verifica emissão individual/global e as coordenadas distintas do ponto final com relógio simulado. O teste de Mapas/Prisma/Kafka usa dublês e não prova segurança de rede real. Não executar e2e real sem ambientes descartáveis e chaves de teste autorizadas.
