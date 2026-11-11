@@ -35,3 +35,21 @@ A limpeza remove arquivos **do índice Git nesta branch**, não apaga artefatos 
 - **Correção integrada:** remover comentário TypeScript obsoleto, corrigir broadcast das coordenadas finais e adicionar testes do canal WebSocket.
 - **Resultado posterior:** [GitHub Actions #43112073712](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43112073712) aprovou **5 suites Jest e 13 testes**, incluindo dois de gateway, usando `npm ci` a partir do `package-lock.json` preservado e sem Google Maps/MongoDB/Kafka reais.
 - Este gate **não** executou `npm run build`, todas as specs ou E2E; status parcial, não aptidão para produção. Os diretórios `node_modules` e `dist` continuam ignorados, mas não estão mais versionados no HEAD deste PR.
+
+
+## Integração 1.1.0 e proposta de proteção de entrada — 11/11/2026
+
+| Marco | Referência | Evidência | Situação |
+|---|---|---|---|
+| **1.1.0 integrada** | [PR #3](https://github.com/DanieldeAlmeida2024/nestjs-api/pull/3), squash `af64402532f723a58b2193377157e9de31609774` | [CI main #43112866410](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43112866410), 5 suites Jest aprovadas | Código e documentação mesclados, sem deploy |
+| **1.2.0 proposta** | `fix/route-boundaries-and-build-ci-20261111` | Adiciona validação de coordenadas/ID, DELETE fail-closed e gate `npm run build` | CI da nova branch pendente |
+
+**Compatibilidade:** `DELETE /routes/:id` antes respondia HTTP 200 com texto de sucesso **falso**; a revisão retorna HTTP 501 até que um contrato autorizado de exclusão seja implementado. `POST /routes/:id/process-route` passa a retornar HTTP 400 quando as coordenadas não são numéricas/finitas ou excedem o intervalo geográfico. Sem autorização WebSocket/Mongo integrados, ainda não considerar a API pronta para exposição pública.
+
+
+## Evidência executada — build NestJS e guardas de entrada
+
+- [GitHub Actions #43114601405](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43114601405): job `Jest rotas, Maps e rastreamento` **success**.
+- Etapas explicitamente confirmadas no job: `npm ci`, **`npm run build` aprovado**, e cinco suítes Jest direcionadas aprovadas, incluindo entradas GPS inválidas e rejeição de DELETE placeholder.
+- Commit de código/documentos validado: `c2899183f092f295a728c95c4626c40f5e945ce9`. Commit só documental posterior exige novo CI.
+- Não é validação HTTP/Mongo/Kafka real nem certificação de autorização WebSocket. DELETE permanece explicitamente desabilitado com HTTP 501.

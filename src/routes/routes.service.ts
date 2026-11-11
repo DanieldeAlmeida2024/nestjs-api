@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, NotImplementedException } from '@nestjs/common';
 import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
 import { PrismaService } from '../prisma/prisma.service';
@@ -114,7 +114,9 @@ export class RoutesService {
     });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} route`;
+  remove(_id: string): never {
+    // Fail closed: o endpoint não deve fingir ter excluído uma rota.
+    // Exclusão real requer autorização de proprietário, cascata e auditoria.
+    throw new NotImplementedException('Exclusão de rotas indisponível');
   }
 }

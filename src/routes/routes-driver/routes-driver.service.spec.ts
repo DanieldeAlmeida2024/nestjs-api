@@ -33,4 +33,23 @@ describe('RoutesDriverService — persistência e emissão de pontos', () => {
       .rejects.toThrow('MongoDB unavailable');
     expect(gateway.emitNewPoints).not.toHaveBeenCalled();
   });
+
+  it.each([
+    { route_id: 'route-a', lat: 91, lng: 0 },
+    { route_id: 'route-a', lat: -91, lng: 0 },
+    { route_id: 'route-a', lat: 0, lng: 181 },
+    { route_id: 'route-a', lat: 0, lng: -181 },
+    { route_id: 'route-a', lat: NaN, lng: 0 },
+    { route_id: 'route-a', lat: Infinity, lng: 0 },
+    { route_id: 'route-a', lat: 0, lng: Infinity },
+    { route_id: '', lat: 0, lng: 0 },
+    { route_id: '   ', lat: 0, lng: 0 },
+    { route_id: 'route-a', lat: '0', lng: 0 },
+  ])('NEST-T09 rejeita coordenada ou ID inválido antes de persistir: %p', async (input) => {
+    const { BadRequestException } = require('@nestjs/common');
+    await expect(service.processRoute(input as any)).rejects.toThrow(BadRequestException);
+    expect(prisma.routeDriver.upsert).not.toHaveBeenCalled();
+    expect(gateway.emitNewPoints).not.toHaveBeenCalled();
+  });
+
 });
