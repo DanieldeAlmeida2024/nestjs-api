@@ -73,3 +73,15 @@ A suíte original de cinco arquivos permanece em `unit-tests.yml`. O build é ga
 - Etapas explicitamente confirmadas no job: `npm ci`, **`npm run build` aprovado**, e cinco suítes Jest direcionadas aprovadas, incluindo entradas GPS inválidas e rejeição de DELETE placeholder.
 - Commit de código/documentos validado: `c2899183f092f295a728c95c4626c40f5e945ce9`. Commit só documental posterior exige novo CI.
 - Não é validação HTTP/Mongo/Kafka real nem certificação de autorização WebSocket. DELETE permanece explicitamente desabilitado com HTTP 501.
+
+
+## NEST-T07 — consumidor Kafka sem chamada HTTP local (1.3.0 proposta)
+
+| Cenário | Teste Jest | Esperado |
+|---|---|---|
+| Evento `simulation` válido | `RoutesDriverConsumer.driverMoved` com `RoutesDriverService` real e Prisma/gateway simulados | `upsert` chamado uma vez, ponto propagado pelo gateway |
+| Coordenadas fora da faixa | mesmo handler | `BadRequestException`, nenhuma persistência nem broadcast |
+| Payload ausente | mesmo handler | erro de validação, nenhuma persistência |
+| Falha de banco | service `upsert` lança erro | propagação de erro, nenhum broadcast |
+
+**Arquivo:** `routes-driver.consumer.spec.ts`, incluído no workflow das **seis** suites Jest e no build NestJS. O teste não executa Kafka/Mongo/HTTP real, mas verifica a integração direta e a ausência de dependência do loopback.

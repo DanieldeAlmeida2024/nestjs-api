@@ -53,3 +53,13 @@ A limpeza remove arquivos **do índice Git nesta branch**, não apaga artefatos 
 - Etapas explicitamente confirmadas no job: `npm ci`, **`npm run build` aprovado**, e cinco suítes Jest direcionadas aprovadas, incluindo entradas GPS inválidas e rejeição de DELETE placeholder.
 - Commit de código/documentos validado: `c2899183f092f295a728c95c4626c40f5e945ce9`. Commit só documental posterior exige novo CI.
 - Não é validação HTTP/Mongo/Kafka real nem certificação de autorização WebSocket. DELETE permanece explicitamente desabilitado com HTTP 501.
+
+
+## Versão 1.3.0 proposta — consumidor Kafka sem HTTP de loopback (11/11/2026)
+
+| Marco | SHA / PR | Estado |
+|---|---|---|
+| **1.2.0 integrada** | [PR #4](https://github.com/DanieldeAlmeida2024/nestjs-api/pull/4), squash `7d6a5061a2fb056e43a4000d6b6762cd00e63abe` | GPS validado, DELETE falha com 501, build no CI |
+| **1.3.0 proposta** | `fix/kafka-consumer-internal-service-20261111` | `RoutesDriverConsumer` injeta `RoutesDriverService` e não usa `HttpService.axiosRef.post(localhost:3000)`; testes de simulação Kafka simulada em CI |
+
+O evento `simulation` já trafega dentro do mesmo módulo NestJS. O novo consumidor mantém a persistência `routeDriver.upsert` e o WebSocket por meio do serviço existente, sem exigir que o processo faça chamada HTTP a si próprio. Validação das coordenadas permanece centralizada no service e erros são propagados ao broker (política efetiva de retry/idempotência Kafka ainda **não implementada**). Não há deploy.

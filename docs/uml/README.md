@@ -9,3 +9,5 @@ Diagramas editáveis: [01_componentes](01_componentes.puml) · [02_modelo_rotas]
 
 
 - [Validação geográfica e exclusão fail-closed](05_validacao_de_rotas.puml) — v1.2.0 proposta.
+
+- [Simulação Kafka para service, sem HTTP localhost](06_consumidor_kafka_interno.puml) — revisão 1.3.0 proposta.

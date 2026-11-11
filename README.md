@@ -98,3 +98,6 @@ npm test -- --runInBand --runTestsByPath src/routes/routes.service.spec.ts src/m
 
 ## Segurança de contrato HTTP (v1.2.0 proposta)
 `POST /routes/:id/process-route` rejeita coordenadas fora dos intervalos geográficos ou não finitas antes de consultar Prisma; `DELETE /routes/:id` responde **501 Não implementado**, em vez de simular exclusão. O CI adiciona `npm run build` ao gate Jest. [Especificação](docs/projeto/ESPECIFICACAO.md) · [Testes](docs/testes/PLANO_DE_TESTES.md). Nenhum deploy foi realizado.
+
+## Kafka simulation sem loopback HTTP
+O consumidor `simulation` agora chama diretamente `RoutesDriverService` e reutiliza a validação GPS e a persistência já existente. Deixa de exigir `localhost:3000`. Esta revisão é testada com mocks, **não** valida autenticação WebSocket, Kafka real ou deduplicação; veja [NEST-T07](docs/testes/PLANO_DE_TESTES.md).
