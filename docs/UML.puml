@@ -1,0 +1,10 @@
+@startuml
+title nestjs-api - componentes conceituais
+actor Usuario
+component Entrada
+component Aplicacao
+component Integracoes
+Usuario --> Entrada
+Entrada --> Aplicacao
+Aplicacao --> Integracoes
+@enduml
