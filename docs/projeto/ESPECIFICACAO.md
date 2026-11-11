@@ -1,6 +1,6 @@
 # Plataforma de rotas e rastreamento — API NestJS
 
-> **NEST-DOC v1.0.0** · 11/11/2026 · base analisada `4d06f21327dd1702c2c7f33bcd5e1ba52d867c40` · revisão estática.
+> **NEST-DOC v1.1.0 proposta** · 11/11/2026 · base analisada `4d06f21327dd1702c2c7f33bcd5e1ba52d867c40` · revisão estática.
 
 
 ## Propósito
@@ -29,4 +29,16 @@ API de rotas de entrega integrada ao Google Maps Directions, MongoDB (via Prisma
 - `RoutesDriverGateway` configura CORS `origin:'*'`; revisar segurança antes de publicar na internet.
 - `RoutesDriverConsumer` fixa `http://localhost:3000`; corrigir para serviço/configuração em deploy com contêiner.
 - Código faz chamadas a API de mapas; não usar chave real nos testes.
-- O repositório contém grande volume de `node_modules` versionado; limpar requer PR próprio cuidadoso.
+- A revisão 1.1.0 propõe limpeza do índice Git: 20.153 arquivos no diretório `node_modules` e 60 em `dist` deixam de ser rastreados; os diretórios já constavam no `.gitignore`. A mudança é em um PR próprio de higiene e testes, sem excluir dependências do manifesto/lock.
+
+
+## Contrato de testes isolados — revisão 1.1.0 proposta
+- `RoutesService.create`: o serviço consulta Directions, grava a rota via Prisma e emite `RouteCreated` no tópico `route`. O teste verifica `source/destination`, distância, duração, nome e os pontos enviados; nenhuma requisição Google, escrita Mongo ou Kafka real acontece.
+- `RoutesService.startRoute`: `findUniqueOrThrow` precisa confirmar rota antes de enviar `DeliveryStarted`; rota ausente propaga erro e não envia evento.
+- `DirectionsService`: input `place_id` e `TravelMode.driving` são preservados; erro do Maps é propagado sem resposta fictícia.
+- `PlacesService`: solicita somente campos `place_id, formatted_address, geometry, name` e retorna a resposta do provedor simulada.
+- `RoutesDriverService.processRoute`: `upsert` com ponto do motorista e publicação via gateway do mesmo payload; falha de persistência não emite evento WebSocket.
+- Removido `console.log(createRouteDto)` no fluxo de criação para não registrar payload de entrada arbitrariamente.
+- **Débito explícito:** falha Kafka após criação pode deixar registro sem evento; remover log e adicionar testes não equivale a outbox/retry. `RoutesService.remove` ainda devolve string sem exclusão real; manter bloqueado antes de disponibilizar essa rota em produção.
+
+**Instalação limpa:** `npm ci` a partir do lock, executada no CI do PR. Não é necessário manter a árvore de dependências no Git. [Rastreabilidade dos testes](../testes/PLANO_DE_TESTES.md) e [sequência UML](../uml/04_testes_dominio_rotas.puml).
