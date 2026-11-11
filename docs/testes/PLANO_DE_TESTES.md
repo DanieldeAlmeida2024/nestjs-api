@@ -65,3 +65,11 @@ Consultar `package.json` e usar os scripts de teste Jest do projeto; rodar build
 | NEST-T15 | `npm run build` | Compila todo NestJS; revela TS de módulos não exercitados no Jest direcionado | CI pendente |
 
 A suíte original de cinco arquivos permanece em `unit-tests.yml`. O build é gate adicional, sem alegar que a aplicação está pronta para deploy.
+
+
+## Evidência executada — build NestJS e guardas de entrada
+
+- [GitHub Actions #43114601405](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43114601405): job `Jest rotas, Maps e rastreamento` **success**.
+- Etapas explicitamente confirmadas no job: `npm ci`, **`npm run build` aprovado**, e cinco suítes Jest direcionadas aprovadas, incluindo entradas GPS inválidas e rejeição de DELETE placeholder.
+- Commit de código/documentos validado: `c2899183f092f295a728c95c4626c40f5e945ce9`. Commit só documental posterior exige novo CI.
+- Não é validação HTTP/Mongo/Kafka real nem certificação de autorização WebSocket. DELETE permanece explicitamente desabilitado com HTTP 501.

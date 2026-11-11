@@ -59,3 +59,11 @@ A compilação de gateway falhava por `@ts-expect-error` obsoleto (TS2578), dete
 - **Permanecem abertos:** WebSocket sem autorização, `origin:'*'`, Kafka outbox, ObjectId inválido, rate-limit e testes reais Mongo/Kafka.
 
 [Plano de testes](../testes/PLANO_DE_TESTES.md) · [UML boundary checks](../uml/05_validacao_de_rotas.puml).
+
+
+## Evidência executada — build NestJS e guardas de entrada
+
+- [GitHub Actions #43114601405](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43114601405): job `Jest rotas, Maps e rastreamento` **success**.
+- Etapas explicitamente confirmadas no job: `npm ci`, **`npm run build` aprovado**, e cinco suítes Jest direcionadas aprovadas, incluindo entradas GPS inválidas e rejeição de DELETE placeholder.
+- Commit de código/documentos validado: `c2899183f092f295a728c95c4626c40f5e945ce9`. Commit só documental posterior exige novo CI.
+- Não é validação HTTP/Mongo/Kafka real nem certificação de autorização WebSocket. DELETE permanece explicitamente desabilitado com HTTP 501.
