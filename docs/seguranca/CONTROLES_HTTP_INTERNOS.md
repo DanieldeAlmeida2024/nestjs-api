@@ -39,3 +39,7 @@ O uso de segredo estático de serviço cria um principal interno único: um vaza
 - [Matriz de testes detalhada](../testes/HTTP_AUTORIZACAO.md).
 - [Diagrama de sequência editável](../uml/08_http_guards_e_escopos.puml).
 - [Controle de versão](../controle/VERSIONAMENTO.md).
+
+## Gate da proposta — evidência controlada
+
+[CI #43128713841](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43128713841): **8 suítes, 51 testes e build PASS**, HEAD `f4d597e4615014eeb461d12365bff4733020d915`. Verificar o check exato após qualquer alteração posterior; testes de rede real e RBAC de usuários continuam bloqueando a publicação.

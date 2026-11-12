@@ -20,3 +20,11 @@
 **Comandos reproduzíveis:** `npm ci`, `npm run build`, `npm test -- --runInBand --runTestsByPath src/security/http-boundaries.spec.ts`. O workflow `.github/workflows/unit-tests.yml` inclui também as sete suítes anteriores. Consultar logs no SHA exato; não afirmar PASS antes de executar o CI.
 
 **Testes isolados:** não acessam servidores Google, Kafka ou MongoDB; usam controladores e guardas NestJS reais, ciclo HTTP via Supertest e services substituídos. As verificações anteriores do PR #6 (Socket.IO por sala, GPS e simulação HTTP) permanecem no gate.
+
+## Evidência no GitHub Actions (SHA de código e documentação)
+
+- HEAD publicado e validado: `f4d597e4615014eeb461d12365bff4733020d915`.
+- [Run #43128485353](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43128485353): `npm ci --no-audit --no-fund`, **`npm run build` PASS**, oito suítes Jest **PASS**.
+- [Run #43128713841](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43128713841): **8/8 suítes e 51/51 testes PASS**, compilação NestJS PASS. Nove novos cenários NEST-HTTP-B01..09.
+- O GitHub Actions usa Supertest com controllers/guards reais e dependências de Google/Mongo/Kafka simuladas. **Não comprova** TLS, Mongo/Kafka reais, identidade/ACL de usuários, emissor de capability, revogação nem rate-limiting.
+- O commit desta nota apenas versiona a evidência. Revalidar o SHA final do PR, e não usar teste anterior como comprovação de código divergente.

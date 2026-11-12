@@ -119,3 +119,11 @@ Agora o controller exige `Authorization: Bearer <route-capability>` assinado por
 | NEST-HTTP-MTX | `docs/testes/HTTP_AUTORIZACAO.md` | Matriz NEST-HTTP-B01..09, E2E I01..03 ainda pendentes |
 
 Branch empilhada sobre o PR #6: `fix/internal-http-service-boundaries-20261111`. **Não é merge nem deploy.** Alteração incompatível: token interno obrigatório para backends de administração e Google Maps, capability vinculada à rota para detalhes; emissor de credenciais seguro, RBAC de usuários, TLS/WSS real e testes Mongo/Kafka permanecem bloqueadores. Verificar CI no SHA completo do PR antes de integrar.
+
+## Evidência no GitHub Actions (SHA de código e documentação)
+
+- HEAD publicado e validado: `f4d597e4615014eeb461d12365bff4733020d915`.
+- [Run #43128485353](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43128485353): `npm ci --no-audit --no-fund`, **`npm run build` PASS**, oito suítes Jest **PASS**.
+- [Run #43128713841](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43128713841): **8/8 suítes e 51/51 testes PASS**, compilação NestJS PASS. Nove novos cenários NEST-HTTP-B01..09.
+- O GitHub Actions usa Supertest com controllers/guards reais e dependências de Google/Mongo/Kafka simuladas. **Não comprova** TLS, Mongo/Kafka reais, identidade/ACL de usuários, emissor de capability, revogação nem rate-limiting.
+- O commit desta nota apenas versiona a evidência. Revalidar o SHA final do PR, e não usar teste anterior como comprovação de código divergente.
