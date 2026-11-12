@@ -101,3 +101,7 @@ npm test -- --runInBand --runTestsByPath src/routes/routes.service.spec.ts src/m
 
 ## Kafka simulation sem loopback HTTP
 O consumidor `simulation` agora chama diretamente `RoutesDriverService` e reutiliza a validação GPS e a persistência já existente. Deixa de exigir `localhost:3000`. Esta revisão é testada com mocks, **não** valida autenticação WebSocket, Kafka real ou deduplicação; veja [NEST-T07](docs/testes/PLANO_DE_TESTES.md).
+
+## Proteção HTTP interna — proposta 1.5.0 (sem deploy)
+
+Esta branch exige `ROUTES_INTERNAL_API_TOKEN` exclusivo e aleatório (mínimo 32 bytes) para criação/início/edição/listagem de rotas e uso dos endpoints do Google Maps. A leitura de uma rota individual exige token HMAC temporário da mesma rota (`ROUTES_WS_TOKEN_SECRET`, `read` ou `simulate`). Não entregar o token interno a navegadores ou apps de usuários; a integração com login e ACL real ainda **não existe** neste projeto. `GET /health` não foi criado artificialmente, nem o helper de emissão de token foi exposto como endpoint público. [Especificação](docs/seguranca/CONTROLES_HTTP_INTERNOS.md), [testes HTTP](docs/testes/HTTP_AUTORIZACAO.md), [UML](docs/uml/08_http_guards_e_escopos.puml), [histórico](docs/controle/VERSIONAMENTO.md).

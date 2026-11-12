@@ -129,3 +129,7 @@ Agora o controller exige `Authorization: Bearer <route-capability>` assinado por
 - [GitHub Actions #43119629162](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43119629162): **`npm run build` e 42/42 testes Jest aprovados em sete suítes** para o código de `9ba206432aac799f80e6c17c6bfd47ae7357aa4f`.
 - Inclui sete verificações NEST-WS e seis NEST-HTTP com token omitido, escopo somente leitura, rota distinta, expiração, assinatura inválida e acesso válido. Os testes são de unidade com socket/service simulados, **não** conexão Socket.IO/HTTP real.
 - Este PR altera contratos para rejeitar conexões/POST sem credencial de simulação; sem um emissor autorizado integrado aos usuários legítimos, o acesso ficará **bloqueado por padrão**. **Manter em draft até implementação e validação do emissor/ACL; não mesclar por estar verde.**
+
+## NEST-HTTP-B — nova matriz de segurança HTTP 1.5.0 proposta
+
+`src/security/http-boundaries.spec.ts` acrescenta nove casos `NEST-HTTP-B01..09` exercitando HTTP real por Supertest e Nest Router com serviços externos simulados, incluindo negação antes de persistência/Kafka ou Google, segregação de token interno e capability, escopo/rota/expiração e manutenção do HTTP 501 para DELETE. [Matriz detalhada e pendências de E2E](HTTP_AUTORIZACAO.md). `.github/workflows/unit-tests.yml` passa a executar oito suítes (sete anteriores + esta). Nenhum resultado é considerado aprovado sem CI do commit exato. ACL de usuários e emissão confiável continuam ausentes.
