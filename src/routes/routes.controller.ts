@@ -8,12 +8,14 @@ import {
   Delete,
   Headers,
   UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
 import { RoutesDriverService } from './routes-driver/routes-driver.service';
 import { readRouteAccessToken } from './routes-driver/route-access-policy';
+import { InternalServiceGuard, RouteReadGuard } from '../security/http-access.guards';
 
 @Controller('routes')
 export class RoutesController {
@@ -22,6 +24,7 @@ export class RoutesController {
     private routesDriverService: RoutesDriverService,
   ) {}
 
+  @UseGuards(InternalServiceGuard)
   @Post()
   create(@Body() createRouteDto: CreateRouteDto) {
     return this.routesService.create(createRouteDto);
@@ -47,26 +50,31 @@ export class RoutesController {
     });
   }
 
+  @UseGuards(InternalServiceGuard)
   @Post(':id/start')
   startRoute(@Param('id') id: string) {
     return this.routesService.startRoute(id);
   }
 
+  @UseGuards(InternalServiceGuard)
   @Get()
   findAll() {
     return this.routesService.findAll();
   }
 
+  @UseGuards(RouteReadGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.routesService.findOne(id);
   }
 
+  @UseGuards(InternalServiceGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateRouteDto: UpdateRouteDto) {
     return this.routesService.update(id, updateRouteDto);
   }
 
+  @UseGuards(InternalServiceGuard)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.routesService.remove(id);

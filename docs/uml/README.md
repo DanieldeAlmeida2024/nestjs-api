@@ -13,3 +13,5 @@ Diagramas editáveis: [01_componentes](01_componentes.puml) · [02_modelo_rotas]
 - [Simulação Kafka para service, sem HTTP localhost](06_consumidor_kafka_interno.puml) — revisão 1.3.0 proposta.
 
 - [WS autenticado por capability temporal e salas isoladas](07_websocket_autorizacao.puml) — 1.4.0 proposta.
+
+- [Fronteiras HTTP, token interno e capability por rota](08_http_guards_e_escopos.puml) — v1.5.0 proposta, não é prova de autorização de usuários finais.

@@ -8,10 +8,11 @@ import { KafkaModule } from '../kafka/kafka.module';
 import { RoutesConsumer } from './routes.consumer';
 import { HttpModule } from '@nestjs/axios';
 import { RoutesDriverConsumer } from './routes-driver/routes-driver.consumer';
+import { InternalServiceGuard, RouteReadGuard } from '../security/http-access.guards';
 
 @Module({
   imports: [MapsModule, KafkaModule, HttpModule],
   controllers: [RoutesController, RoutesConsumer, RoutesDriverConsumer],
-  providers: [RoutesService, RoutesDriverService, RoutesDriverGateway],
+  providers: [RoutesService, RoutesDriverService, RoutesDriverGateway, InternalServiceGuard, RouteReadGuard],
 })
 export class RoutesModule {}

@@ -4,6 +4,7 @@ import { PlacesService } from './places/places.service';
 import { Client as GoogleMapsClient } from '@googlemaps/google-maps-services-js';
 import { DirectionsController } from './directions/directions.controller';
 import { DirectionsService } from './directions/directions.service';
+import { InternalServiceGuard } from '../security/http-access.guards';
 
 @Module({
   controllers: [PlacesController, DirectionsController],
@@ -14,6 +15,7 @@ import { DirectionsService } from './directions/directions.service';
       useValue: new GoogleMapsClient(),
     },
     DirectionsService,
+    InternalServiceGuard,
   ],
   exports: [DirectionsService],
 })

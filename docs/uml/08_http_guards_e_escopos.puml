@@ -1,0 +1,51 @@
+@startuml
+title NestJS — fronteira HTTP interna e leitura por capability (NEST-HTTP 1.5.0)
+actor "Cliente não autenticado" as Guest
+actor "Backend interno confiável" as Service
+actor "Cliente com capability" as User
+participant "Nest Router HTTP" as Router
+participant "InternalServiceGuard" as Internal
+participant "RouteReadGuard" as Read
+participant "HMAC route-access-policy" as Token
+participant "Routes / Maps Services" as Backend
+collections "MongoDB / Kafka / Google Maps" as External
+
+Guest -> Router : POST /routes ou GET /places (sem bearer)
+Router -> Internal : canActivate()
+Internal --> Router : UnauthorizedException 401
+Router --> Guest : 401 sem efeito externo
+
+Service -> Router : POST /routes ou GET /directions
+Bearer token interno
+Router -> Internal : compara token com segredo configurado
+alt segredo ausente ou token incorreto
+  Internal --> Router : 401
+else token interno correto
+  Internal --> Router : true
+  Router -> Backend : operação de serviço
+  Backend -> External : persistência, broker ou provider
+  External --> Backend : resposta
+  Backend --> Router : resultado
+end
+Router --> Service : status HTTP
+
+User -> Router : GET /routes/{id} com capability
+Router -> Read : valida Authorization e params.id
+Read -> Token : readRouteAccessToken() HMAC/TTL/aud/scope/route
+alt inválido ou routeId diferente
+  Token --> Read : null ou rota divergente
+  Read --> Router : 401
+else mesma rota, escopo read/simulate
+  Token --> Read : claims válidos
+  Read --> Router : true
+  Router -> Backend : findOne(id)
+  Backend --> Router : detalhes autorizados
+end
+Router --> User : resposta
+
+note bottom
+Bearer interno NÃO é identidade de usuário;
+emissor de capability e ACL multi-tenant permanecem pendentes.
+Kafka interno continua fora da autorização HTTP.
+end note
+@enduml

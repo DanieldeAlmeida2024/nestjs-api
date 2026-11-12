@@ -104,3 +104,26 @@ Agora o controller exige `Authorization: Bearer <route-capability>` assinado por
 - [GitHub Actions #43119629162](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43119629162): **`npm run build` e 42/42 testes Jest aprovados em sete suítes** para o código de `9ba206432aac799f80e6c17c6bfd47ae7357aa4f`.
 - Inclui sete verificações NEST-WS e seis NEST-HTTP com token omitido, escopo somente leitura, rota distinta, expiração, assinatura inválida e acesso válido. Os testes são de unidade com socket/service simulados, **não** conexão Socket.IO/HTTP real.
 - Este PR altera contratos para rejeitar conexões/POST sem credencial de simulação; sem um emissor autorizado integrado aos usuários legítimos, o acesso ficará **bloqueado por padrão**. **Manter em draft até implementação e validação do emissor/ACL; não mesclar por estar verde.**
+
+## Versão 1.5.0 proposta — controle de acesso HTTP e fronteira Google Maps (11/11/2026)
+
+| ID | Arquivo | Mudança |
+|---|---|---|
+| NEST-HTTP-GUARD | `src/security/http-access.guards.ts` | Bearer interno com segredo 32+ bytes e leitura por capability assinada/escopo de rota |
+| NEST-HTTP-CTRL | `src/routes/routes.controller.ts` e controllers `src/maps/` | `@UseGuards` nas operações de escrita/listagem e consultas faturáveis; `GET /routes/:id` isolado por rota |
+| NEST-HTTP-MOD | `src/routes/routes.module.ts`, `src/maps/maps.module.ts` | Providers de guards registrados explicitamente |
+| NEST-HTTP-TST | `src/security/http-boundaries.spec.ts` | Nove cenários de HTTP com TestModule e serviços simulados |
+| NEST-HTTP-ENV | `.env.example`, workflow CI | Credenciais não definidas por padrão, testes e build no gate |
+| NEST-HTTP-DOC | `docs/seguranca/CONTROLES_HTTP_INTERNOS.md` | Especificação de fluxos, modelos de ameaça e rollout |
+| NEST-HTTP-UML | `docs/uml/08_http_guards_e_escopos.puml` | Diagrama editável por papel/escopo |
+| NEST-HTTP-MTX | `docs/testes/HTTP_AUTORIZACAO.md` | Matriz NEST-HTTP-B01..09, E2E I01..03 ainda pendentes |
+
+Branch empilhada sobre o PR #6: `fix/internal-http-service-boundaries-20261111`. **Não é merge nem deploy.** Alteração incompatível: token interno obrigatório para backends de administração e Google Maps, capability vinculada à rota para detalhes; emissor de credenciais seguro, RBAC de usuários, TLS/WSS real e testes Mongo/Kafka permanecem bloqueadores. Verificar CI no SHA completo do PR antes de integrar.
+
+## Evidência no GitHub Actions (SHA de código e documentação)
+
+- HEAD publicado e validado: `f4d597e4615014eeb461d12365bff4733020d915`.
+- [Run #43128485353](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43128485353): `npm ci --no-audit --no-fund`, **`npm run build` PASS**, oito suítes Jest **PASS**.
+- [Run #43128713841](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43128713841): **8/8 suítes e 51/51 testes PASS**, compilação NestJS PASS. Nove novos cenários NEST-HTTP-B01..09.
+- O GitHub Actions usa Supertest com controllers/guards reais e dependências de Google/Mongo/Kafka simuladas. **Não comprova** TLS, Mongo/Kafka reais, identidade/ACL de usuários, emissor de capability, revogação nem rate-limiting.
+- O commit desta nota apenas versiona a evidência. Revalidar o SHA final do PR, e não usar teste anterior como comprovação de código divergente.
