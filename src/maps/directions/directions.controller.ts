@@ -1,6 +1,8 @@
-import { Controller, Get, Query } from '@nestjs/common';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { InternalServiceGuard } from '../../security/http-access.guards';
 import { DirectionsService } from './directions.service';
 
+@UseGuards(InternalServiceGuard)
 @Controller('directions')
 export class DirectionsController {
   constructor(private directionsService: DirectionsService) {}

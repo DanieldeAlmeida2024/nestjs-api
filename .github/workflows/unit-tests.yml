@@ -1,9 +1,9 @@
 name: NestJS - testes de negócio sem Google/Mongo/Kafka reais
 on:
   pull_request:
-    branches: [main]
+    branches: [main, fix/ws-route-scoped-auth-20261111]
   push:
-    branches: [main]
+    branches: [main, fix/internal-http-service-boundaries-20261111]
 permissions:
   contents: read
 jobs:
@@ -20,7 +20,7 @@ jobs:
         run: npm ci --no-audit --no-fund
       - name: Validar build TypeScript/NestJS
         run: npm run build
-      - name: Executar sete suítes independentes de rede
+      - name: Executar oito suítes, incluindo teste HTTP in-memory
         run: >-
           npm test -- --runInBand --runTestsByPath
           src/routes/routes.service.spec.ts
@@ -30,3 +30,4 @@ jobs:
           src/routes/routes-driver/routes-driver.gateway.spec.ts
           src/routes/routes-driver/routes-driver.consumer.spec.ts
           src/routes/routes.controller.spec.ts
+          src/security/http-boundaries.spec.ts
