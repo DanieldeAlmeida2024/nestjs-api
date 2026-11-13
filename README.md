@@ -18,6 +18,18 @@ Arquivos de referência: `src/, test/, package.json, api.http`.
 ## Estado e riscos
 O README antigo dizia Django, mas o manifesto comprova NestJS. O repositório inclui node_modules e dist rastreados: limpar em PR separado após build controlado.
 
+
+## Bloqueio inicial de rotas HTTP (auditoria de segurança)
+
+As rotas `/routes` são agora protegidas por `RoutesApiKeyGuard`. Em ausência de `ROUTES_API_KEY` com no mínimo 32 caracteres, retornam erro 503 **sem executar o serviço**; com cabeçalho `x-routes-api-key` ausente ou incorreto, retornam 401. Configure o valor apenas no backend e use conexão TLS em ambientes remotos. Nunca envie esta chave ao navegador/frontend nem faça commit dela.
+
+```bash
+npm test -- --runInBand --runTestsByPath src/routes/routes-api-key.guard.spec.ts
+npm run build
+```
+
+**Risco residual P0:** chave compartilhada não comprova identidade individual, propriedade/ACL de cada rota, revogação ou segurança do gateway Socket.IO. Não expor este laboratório à Internet até implementar autenticação por identidade, autorização por recurso e testes de integração. O teste E2E de saudação também foi ajustado para a rota real `GET /test/hello`. A execução completa do E2E ainda requer infraestrutura de teste.
+
 ## Guia técnico
 - [Requisitos](docs/REQUISITOS.md)
 - [Arquitetura](docs/ARQUITETURA.md)
