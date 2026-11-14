@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadGatewayException, Injectable } from '@nestjs/common';
 import {
   DirectionsRequest,
   Client as GoogleMapsClient,
@@ -23,6 +23,18 @@ export class DirectionsService {
     const { data } = await this.googleMapsClient.directions({
       params: requestParams,
     });
+    // ZERO_RESULTS and malformed upstream responses must not crash with
+    // an unhandled TypeError while constructing the request projection.
+    const leg = data.routes?.[0]?.legs?.[0];
+    if (
+      !leg ||
+      !Number.isFinite(leg.start_location?.lat) ||
+      !Number.isFinite(leg.start_location?.lng) ||
+      !Number.isFinite(leg.end_location?.lat) ||
+      !Number.isFinite(leg.end_location?.lng)
+    ) {
+      throw new BadGatewayException('Google Maps não retornou uma rota com coordenadas válidas');
+    }
 
     return {
       ...data,
@@ -30,15 +42,15 @@ export class DirectionsService {
         origin: {
           place_id: requestParams.origin,
           location: {
-            lat: data.routes[0].legs[0].start_location.lat,
-            lng: data.routes[0].legs[0].start_location.lng,
+            lat: leg.start_location.lat,
+            lng: leg.start_location.lng,
           },
         },
         destination: {
           place_id: requestParams.destination,
           location: {
-            lat: data.routes[0].legs[0].end_location.lat,
-            lng: data.routes[0].legs[0].end_location.lng,
+            lat: leg.end_location.lat,
+            lng: leg.end_location.lng,
           },
         },
         mode: requestParams.mode,
