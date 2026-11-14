@@ -6,12 +6,15 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
+import { RoutesApiKeyGuard } from './routes-api-key.guard';
 import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
 import { RoutesDriverService } from './routes-driver/routes-driver.service';
 
+@UseGuards(RoutesApiKeyGuard)
 @Controller('routes')
 export class RoutesController {
   constructor(

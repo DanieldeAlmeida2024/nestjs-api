@@ -1,0 +1,20 @@
+name: NestJS - segurança do acesso às rotas
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  guard:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test -- --runInBand --runTestsByPath src/routes/routes-api-key.guard.spec.ts
+      - run: npm run build
