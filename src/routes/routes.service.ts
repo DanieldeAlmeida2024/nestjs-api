@@ -1,9 +1,13 @@
-import { Inject, Injectable, NotImplementedException } from '@nestjs/common';
+import { BadGatewayException, Inject, Injectable, NotImplementedException } from '@nestjs/common';
 import { CreateRouteDto } from './dto/create-route.dto';
 import { UpdateRouteDto } from './dto/update-route.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { DirectionsService } from '../maps/directions/directions.service';
 import * as kafkaLib from '@confluentinc/kafka-javascript';
+
+// The Go simulator emits one movement per point, one second apart.
+// Keep the producer within its 600-point processing budget.
+export const MAX_ROUTE_SIMULATION_POINTS = 600;
 
 @Injectable()
 export class RoutesService {
@@ -20,7 +24,32 @@ export class RoutesService {
         createRouteDto.destination_id,
       );
 
-    const legs = routes[0].legs[0];
+    const legs = routes?.[0]?.legs?.[0];
+    if (
+      !legs ||
+      !Array.isArray(legs.steps) ||
+      legs.steps.length === 0 ||
+      legs.steps.length * 2 > MAX_ROUTE_SIMULATION_POINTS ||
+      !Number.isSafeInteger(legs.distance?.value) ||
+      legs.distance.value < 0 ||
+      !Number.isSafeInteger(legs.duration?.value) ||
+      legs.duration.value < 0
+    ) {
+      throw new BadGatewayException('Direções inválidas ou rota excede o limite de simulação');
+    }
+
+    const directions = legs.steps.flatMap((step) => [
+      { lat: step.start_location?.lat, lng: step.start_location?.lng },
+      { lat: step.end_location?.lat, lng: step.end_location?.lng },
+    ]);
+    if (directions.some(({ lat, lng }) =>
+      typeof lat !== 'number' || !Number.isFinite(lat) || Math.abs(lat) > 90 ||
+      typeof lng !== 'number' || !Number.isFinite(lng) || Math.abs(lng) > 180
+    )) {
+      throw new BadGatewayException('Coordenadas inválidas no retorno de direções');
+    }
+
+    // Validate the downstream Kafka contract before writing the route to Mongo.
     const route = await this.prismaService.route.create({
       data: {
         name: createRouteDto.name,
@@ -59,18 +88,7 @@ export class RoutesService {
             event: 'RouteCreated',
             id: route.id,
             distance: legs.distance.value,
-            directions: legs.steps.reduce((acc, step) => {
-              acc.push({
-                lat: step.start_location.lat,
-                lng: step.start_location.lng,
-              });
-
-              acc.push({
-                lat: step.end_location.lat,
-                lng: step.end_location.lng,
-              });
-              return acc;
-            }, []),
+            directions,
           }),
         },
       ],

@@ -70,3 +70,12 @@ O evento `simulation` já trafega dentro do mesmo módulo NestJS. O novo consumi
 - [GitHub Actions #43116729112](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43116729112): **31/31 PASS**. Seis suítes Jest, 31 testes aprovados e compilação NestJS aprovada. Inclui o consumidor Kafka com serviço interno, erros de coordenadas e ausência de chamada HTTP localhost.
 - Commit de código testado: `7a5819029555f49a932ae76a5bc64cb0c762df73`. Documentação adicionada depois do run; novo HEAD deverá manter os mesmos gates verdes antes do merge.
 - Sem deploy; CI não substitui testes de segurança/rede/ambiente real fora do escopo.
+
+## NEST 1.4.0 — validação do produtor Kafka (14/11/2026)
+
+- Limita a 300 etapas de direções do Google, gerando até 600 pontos para o Go Simulator.
+- Rejeita distância e duração inválidas e coordenadas ausentes ou fora dos limites antes de persistir dados.
+- Registra regressões NEST-T15–17 no Jest e contrato de integração entre repositórios.
+- Não altera schema Mongo, tópicos Kafka ou API de leitura.
+
+**Compatibilidade:** Google Directions com mais de 300 etapas agora gera erro 502 sem persistir. Faltam outbox transacional, integração real com o broker e estratégia de segmentação para trajetos extensos.

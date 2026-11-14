@@ -1,4 +1,5 @@
-import { RoutesService } from './routes.service';
+import { BadGatewayException } from '@nestjs/common';
+import { MAX_ROUTE_SIMULATION_POINTS, RoutesService } from './routes.service';
 
 describe('RoutesService — domínio de rotas sem rede externa', () => {
   const directions = { getDirections: jest.fn() };
@@ -61,6 +62,60 @@ describe('RoutesService — domínio de rotas sem rede externa', () => {
       event: 'RouteCreated', id: 'route-a', distance: 4000,
       directions: [{ lat: -16.6, lng: -49.2 }, { lat: -16.7, lng: -49.3 }],
     });
+  });
+
+
+  it('NEST-T15 rejects Maps with 301 steps before persisting or publishing', async () => {
+    const oversizedSteps = Array.from({ length: MAX_ROUTE_SIMULATION_POINTS / 2 + 1 }, () => ({
+      start_location: { lat: -16.6, lng: -49.2 },
+      end_location: { lat: -16.7, lng: -49.3 },
+    }));
+    directions.getDirections.mockResolvedValue({
+      ...maps,
+      routes: [{ legs: [{ ...maps.routes[0].legs[0], steps: oversizedSteps }] }],
+    });
+    await expect(service.create(dto)).rejects.toThrow(BadGatewayException);
+    expect(prisma.route.create).not.toHaveBeenCalled();
+    expect(kafka.send).not.toHaveBeenCalled();
+  });
+
+  it('NEST-T16 accepts exactly 300 Maps steps for 600 simulation points', async () => {
+    const acceptedSteps = Array.from({ length: MAX_ROUTE_SIMULATION_POINTS / 2 }, () => ({
+      start_location: { lat: -16.6, lng: -49.2 },
+      end_location: { lat: -16.7, lng: -49.3 },
+    }));
+    directions.getDirections.mockResolvedValue({
+      ...maps,
+      routes: [{ legs: [{ ...maps.routes[0].legs[0], steps: acceptedSteps }] }],
+    });
+    await service.create(dto);
+    const event = JSON.parse(kafka.send.mock.calls[0][0].messages[0].value);
+    expect(event.directions).toHaveLength(MAX_ROUTE_SIMULATION_POINTS);
+    expect(prisma.route.create).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([
+    ['sem pernas', { ...maps, routes: [] }],
+    ['sem etapas', { ...maps, routes: [{ legs: [{ ...maps.routes[0].legs[0], steps: [] }] }] }],
+    ['coordenadas fora do globo', {
+      ...maps,
+      routes: [{ legs: [{ ...maps.routes[0].legs[0],
+        steps: [{ start_location: { lat: 92, lng: 0 }, end_location: { lat: -16, lng: -49 } }] }] }],
+    }],
+    ['coordenadas ausentes', {
+      ...maps,
+      routes: [{ legs: [{ ...maps.routes[0].legs[0],
+        steps: [{ start_location: { lat: -16, lng: -49 }, end_location: {} }] }] }],
+    }],
+    ['distância negativa', {
+      ...maps,
+      routes: [{ legs: [{ ...maps.routes[0].legs[0], distance: { value: -1 } }] }],
+    }],
+  ])('NEST-T17 rejects %s returned by Maps before database mutations', async (_case, invalid) => {
+    directions.getDirections.mockResolvedValue(invalid);
+    await expect(service.create(dto)).rejects.toThrow(BadGatewayException);
+    expect(prisma.route.create).not.toHaveBeenCalled();
+    expect(kafka.send).not.toHaveBeenCalled();
   });
 
   it('NEST-T02 falha de Google Maps não grava rota nem publica Kafka', async () => {

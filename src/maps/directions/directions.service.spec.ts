@@ -1,3 +1,4 @@
+import { BadGatewayException } from '@nestjs/common';
 import { DirectionsService } from './directions.service';
 
 describe('DirectionsService — contrato Google Maps', () => {
@@ -33,6 +34,19 @@ describe('DirectionsService — contrato Google Maps', () => {
     });
     expect(result.request.origin.location).toEqual({ lat: -16, lng: -49 });
     expect(result.request.destination.location).toEqual({ lat: -17, lng: -50 });
+  });
+
+
+  it.each([
+    ['ZERO_RESULTS', { status: 'ZERO_RESULTS', routes: [] }],
+    ['sem pernas', { status: 'OK', routes: [{ legs: [] }] }],
+    ['coordenadas ausentes', {
+      status: 'OK',
+      routes: [{ legs: [{ start_location: { lat: -16, lng: -49 } }] }],
+    }],
+  ])('recusa resposta Maps %s sem TypeError nem rota inventada', async (_case, data) => {
+    google.directions.mockResolvedValue({ data });
+    await expect(service.getDirections('origem', 'destino')).rejects.toThrow(BadGatewayException);
   });
 
   it('propaga erro de provedor, sem inventar direção', async () => {

@@ -54,3 +54,9 @@ O GitHub Actions executa suites de serviços, controllers e regras de segurança
 [Especificação](docs/projeto/ESPECIFICACAO.md) · [Arquitetura](docs/ARQUITETURA.md) · [UML](docs/uml/README.md) · [Plano de testes](docs/testes/PLANO_DE_TESTES.md) · [Controle de versões](docs/controle/VERSIONAMENTO.md).
 
 Material de origem: [Imersão Full Cycle](https://imersao.fullcycle.com.br/).
+
+## Compatibilidade NestJS → Kafka → Go Simulator
+
+A criação de rotas valida o retorno do Google Maps **antes** de persistir no MongoDB e publicar `RouteCreated`. O produtor aceita até **300 etapas** (até **600 coordenadas**, duas por etapa), exige distância e duração inteiras não negativas e rejeita coordenadas inexistentes ou fora dos intervalos de latitude/longitude. Esse orçamento acompanha o contrato `GO-SIM 1.2.0` do [simulador Go](https://github.com/DanieldeAlmeida2024/golang-simulator).
+
+Respostas de direções inválidas geram erro explícito de gateway (**502**), sem gravação de rota nem publicação Kafka. Isso não resolve a possibilidade de falha de Kafka **depois** de uma rota válida já ter sido gravada; para consistência forte ainda é necessário um outbox transacional e processamento idempotente.
