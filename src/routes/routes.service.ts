@@ -43,8 +43,8 @@ export class RoutesService {
       { lat: step.end_location?.lat, lng: step.end_location?.lng },
     ]);
     if (directions.some(({ lat, lng }) =>
-      !Number.isFinite(lat) || Math.abs(lat) > 90 ||
-      !Number.isFinite(lng) || Math.abs(lng) > 180
+      typeof lat !== 'number' || !Number.isFinite(lat) || Math.abs(lat) > 90 ||
+      typeof lng !== 'number' || !Number.isFinite(lng) || Math.abs(lng) > 180
     )) {
       throw new BadGatewayException('Coordenadas inválidas no retorno de direções');
     }
