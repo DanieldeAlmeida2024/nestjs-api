@@ -76,3 +76,15 @@ A compilação de gateway falhava por `@ts-expect-error` obsoleto (TS2578), dete
 **Agora:** `RoutesDriverConsumer` injeta `RoutesDriverService` (já provider no `RoutesModule`) e chama `processRoute` diretamente. O service já rejeita coordenadas inválidas, grava via Prisma, e só emite WebSocket após persistir. O consumidor não registra o payload de localização inteiro no log. A API `POST /routes/:id/process-route` **não** foi removida nem protegida nesta mudança; sua autorização segue pendente.
 
 **Limites:** não foram adicionados idempotency keys, ordenação de eventos, deduplicação de pontos nem backoff/dead-letter para Kafka. Sem MongoDB real ou consumer group no CI, o teste é unitário com a implementação do service e gateways simulados.
+
+## Contrato do produtor de eventos de simulação — NEST 1.4.0
+
+O serviço `RoutesService.create` transforma cada etapa de Google Directions em **duas** coordenadas (início e fim) no evento `RouteCreated`. O simulador Go executa uma pausa de um segundo entre os pontos e estabelece um limite máximo de 600.
+
+O produtor valida **antes** de `PrismaService.route.create`:
+- Pelo menos uma etapa e no máximo 300 etapas (600 coordenadas).
+- Distância e duração inteiras e não negativas.
+- Latitude e longitude numéricas, finitas e dentro de ±90/±180.
+- Presença de rota, legs e steps no retorno do Google Maps.
+
+Se o provedor retorna estrutura inválida ou muito extensa, o backend responde com `BadGatewayException` (502). Não grava rota nem publica evento. O limite evita incompatibilidade do contrato entre dois serviços, mas não estabelece idempotência, outbox transacional ou confirmação de consumo real.
