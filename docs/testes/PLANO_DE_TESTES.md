@@ -104,3 +104,5 @@ A suíte original de cinco arquivos permanece em `unit-tests.yml`. O build é ga
 | NEST-T17c | Distância negativa | HTTP 502; não persistir |
 
 Arquivo: `src/routes/routes.service.spec.ts`. O CI exercita os cenários com mocks das respostas de Google Directions, Prisma e Kafka. **Não substitui teste E2E** entre produtor, broker e simulador Go. O contrato de mensagem deve ser revisto nos dois projetos quando o orçamento de pontos for alterado.
+
+| NEST-T18 | Google Directions retorna ZERO_RESULTS ou legs sem coordenadas | `BadGatewayException` (502) em vez de `TypeError` | `src/maps/directions/directions.service.spec.ts` |
