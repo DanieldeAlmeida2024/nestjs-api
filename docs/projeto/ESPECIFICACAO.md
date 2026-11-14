@@ -88,3 +88,5 @@ O produtor valida **antes** de `PrismaService.route.create`:
 - Presença de rota, legs e steps no retorno do Google Maps.
 
 Se o provedor retorna estrutura inválida ou muito extensa, o backend responde com `BadGatewayException` (502). Não grava rota nem publica evento. O limite evita incompatibilidade do contrato entre dois serviços, mas não estabelece idempotência, outbox transacional ou confirmação de consumo real.
+
+A integração `DirectionsService.getDirections` também rejeita `ZERO_RESULTS`, `legs` ausentes e coordenadas sem origem/destino válidas com erro 502, antes de montar a projeção da resposta. Isso evita `TypeError` por desreferenciar `routes[0].legs[0]` quando o Google Maps não encontra trajeto.
