@@ -79,3 +79,9 @@ O evento `simulation` já trafega dentro do mesmo módulo NestJS. O novo consumi
 - Não altera schema Mongo, tópicos Kafka ou API de leitura.
 
 **Compatibilidade:** Google Directions com mais de 300 etapas agora gera erro 502 sem persistir. Faltam outbox transacional, integração real com o broker e estratégia de segmentação para trajetos extensos.
+
+## WS-SEC v1.6.0 proposta — 14/11/2026
+
+- Proteção Socket.IO com HMAC por rota, escopo e expiração; GPS deixa de ser enviado globalmente.
+- Testes negativos NEST-WS01..07 no gateway e documentação `docs/seguranca/WEBSOCKET_ROTAS.md` com UML.
+- Bloqueado para deploy enquanto não houver emissor confiável de capabilities e homologação dos clientes.

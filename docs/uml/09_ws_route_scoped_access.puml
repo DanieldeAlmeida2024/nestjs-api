@@ -1,0 +1,19 @@
+@startuml
+title Rastreamento WebSocket com sessão por rota
+actor Usuario
+participant "Auth/ACL (pendente)" as A
+participant "Gateway Socket.IO" as W
+participant "Política HMAC" as H
+participant "Room route:<id>" as R
+Usuario -> A: Solicitar acesso a rota
+note right of A: Emissor confiável ainda não implementado
+A --> Usuario: token read/simulate (TTL até 15 min)
+Usuario -> W: connect handshake.auth.token
+W -> H: validar assinatura, expiração, escopo, routeId
+alt token inválido
+  W --> Usuario: disconnect
+else token válido
+  W -> R: join rota autorizada
+  R --> Usuario: server:new-points/<id>:list
+end
+@enduml
