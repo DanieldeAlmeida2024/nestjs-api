@@ -92,3 +92,15 @@ A suíte original de cinco arquivos permanece em `unit-tests.yml`. O build é ga
 - [GitHub Actions #43116729112](https://github.com/DanieldeAlmeida2024/nestjs-api/actions/runs/43116729112): **31/31 PASS**. Seis suítes Jest, 31 testes aprovados e compilação NestJS aprovada. Inclui o consumidor Kafka com serviço interno, erros de coordenadas e ausência de chamada HTTP localhost.
 - Commit de código testado: `7a5819029555f49a932ae76a5bc64cb0c762df73`. Documentação adicionada depois do run; novo HEAD deverá manter os mesmos gates verdes antes do merge.
 - Sem deploy; CI não substitui testes de segurança/rede/ambiente real fora do escopo.
+
+## Testes de compatibilidade do produtor Kafka — NEST-T15–17
+
+| ID | Cenário | Resultado esperado |
+| --- | --- | --- |
+| NEST-T15 | Google Maps retorna 301 etapas | HTTP 502, sem escrita Prisma ou publicação Kafka |
+| NEST-T16 | Google Maps retorna 300 etapas válidas | Evento RouteCreated com exatamente 600 coordenadas |
+| NEST-T17a | Nenhuma rota ou nenhuma etapa | HTTP 502; não persistir |
+| NEST-T17b | Latitude fora da faixa ou campos ausentes | HTTP 502; não persistir |
+| NEST-T17c | Distância negativa | HTTP 502; não persistir |
+
+Arquivo: `src/routes/routes.service.spec.ts`. O CI exercita os cenários com mocks das respostas de Google Directions, Prisma e Kafka. **Não substitui teste E2E** entre produtor, broker e simulador Go. O contrato de mensagem deve ser revisto nos dois projetos quando o orçamento de pontos for alterado.
